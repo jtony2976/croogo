@@ -3,6 +3,7 @@
 namespace Croogo\Acl\Model\Table;
 
 use Cake\Utility\Hash;
+use Cake\ORM\TableRegistry;
 
 /**
  * AclAco Model
@@ -39,12 +40,12 @@ class AcosTable extends \Acl\Model\Table\AcosTable
         $parent = $current = null;
         foreach ($pathE as $alias) {
             $current[] = $alias;
-            $node = $this->node(join('/', $current));
+            $node = $this->node(join('/', $current))->toArray();
             if ($node) {
                 $parent = $node[0];
             } else {
-                $aco = $this->create([
-                    'parent_id' => $parent['Aco']['id'],
+                $aco = $this->newEntity([
+                    'parent_id' => $parent->id,
                     'alias' => $alias,
                 ]);
                 $parent = $this->save($aco);
@@ -68,21 +69,21 @@ class AcosTable extends \Acl\Model\Table\AcosTable
         // AROs
         $roles = [];
         if (count($allowRoles) > 0) {
-            $roles = ClassRegistry::init('Users.Role')->find('list', [
+            $roles = TableRegistry::get('Croogo/Users.Roles')->find('list', [
                 'conditions' => [
-                    'Role.alias' => $allowRoles,
+                    'Roles.alias IN' => $allowRoles,
                 ],
                 'fields' => [
-                    'Role.id',
-                    'Role.alias',
+                    'Roles.id',
+                    'Roles.alias',
                 ],
-            ]);
+            ])->toArray();
         }
 
         $this->createFromPath($action);
-        $Permission = ClassRegistry::init('Acl.AclPermission');
+        $Permission = TableRegistry::get('Croogo/Acl.Permissions');
         foreach ($roles as $roleId => $roleAlias) {
-            $Permission->allow(['model' => 'Croogo/Acl.Aros', 'foreign_key' => $roleId], $action);
+            $Permission->allow(['model' => 'Roles', 'foreign_key' => $roleId], $action);
         }
     }
 

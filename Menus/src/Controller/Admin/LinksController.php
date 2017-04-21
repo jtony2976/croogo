@@ -167,7 +167,7 @@ class LinksController extends AppController
 
         $redirect = ['action' => 'index'];
 
-        $menu = $this->Links->Menus->get($menuId);
+        $menu = $Links->Menus->get($menuId);
         if (isset($menu->id)) {
             $redirect['?'] = ['menu_id' => $menuId];
         }
@@ -181,7 +181,7 @@ class LinksController extends AppController
         ];
         $options = compact('multiple', 'redirect', 'messageMap');
 
-        return $this->BulkProcess->process($this->Links, $action, $ids, $options);
+        return $this->BulkProcess->process($Links, $action, $ids, $options);
     }
 
     public function beforeCrudRender(Event $event)
